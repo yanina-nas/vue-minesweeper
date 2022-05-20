@@ -8,9 +8,22 @@ const DEFAULT_COLUMNS = 10
 const DEFAULT_MINES = 10
 
 interface Minefield {
-  open: boolean;
+  isOpened: boolean;
   isBomb: boolean;
   message: string;
+}
+
+const onBingNeighbors = (x: number, y: number) => {
+  console.log('bing my neighbours! I a cell am at ', x, ' ', y)
+  console.log('before updateMinefield', state.value)
+  updateMinefield(state.value, x, y)
+  console.log('after updateMinefield', state.value)
+}
+
+const updateMinefield = (minefield: Minefield[][], x: number, y: number) => {
+  // minefield[x+1][y+1].isOpened = true
+  console.log('minefield[x+1][y+1] : ', minefield[x+1][y+1])
+  console.log('from update minefield ', x, y)
 }
 
 const createMinefield = (rows: number, columns: number, numBombs: number) => {
@@ -20,7 +33,7 @@ const createMinefield = (rows: number, columns: number, numBombs: number) => {
   for (let i = 0; i < rows; i++) {
     _minefield[i] = _minefield[i] || [];
     for (let j = 0; j < rows; j++) {
-      _minefield[i][j] = { open: false, isBomb: false, message: "" }
+      _minefield[i][j] = { isOpened: false, isBomb: false, message: "" }
     }
   }
 
@@ -33,7 +46,7 @@ const createMinefield = (rows: number, columns: number, numBombs: number) => {
 
   bombs.forEach(([ x, y ]) => {
     console.log([ x, y ]);
-    _minefield[x][y] = { open: false, isBomb: true, message: "💣" };
+    _minefield[x][y] = { isOpened: false, isBomb: true, message: "💣" };
   })
 
   console.log('minefieldWithBomb', _minefield)
@@ -45,20 +58,14 @@ const tmp = createMinefield(DEFAULT_ROWS, DEFAULT_COLUMNS, DEFAULT_MINES);
 
 const state = ref(tmp)
 
-function bingNeighbors(x: number, y: number) {
-  console.log('bing my neighbours! I a cell am at ', x, ' ', y)
-  console.log("I work")
-  // update state => this one and those around auto-open
-}
-
 </script>
 
 <template>
   <header>
     <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-    <div @bing-neighbors="bingNeighbors" class="wrapper">
+    <div @bing-neighbors="onBingNeighbors" class="wrapper">
       <div v-for="(n, numY) in DEFAULT_ROWS" class="gameRow">
-        <Cell v-for="(m, numX) in DEFAULT_COLUMNS" :isBomb=state[numX][numY].isBomb :message=state[numX][numY].message :x=numX :y=numY /> 
+        <Cell @bingNeighbors="onBingNeighbors" v-for="(m, numX) in DEFAULT_COLUMNS" :isOpened=state[numX][numY].isOpened :isBomb=state[numX][numY].isBomb :message=state[numX][numY].message :x=numX :y=numY /> 
       </div>
     </div>
   </header>

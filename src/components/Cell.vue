@@ -3,6 +3,7 @@ import { ref } from 'vue'
 
 const props = defineProps<{
     isBomb: boolean
+    isOpened: boolean // no link with isOpened so far
     message: string
     x: number
     y: number
