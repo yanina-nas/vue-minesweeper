@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 
 const props = defineProps<{
     isBomb: boolean
-    isOpened: boolean // no link with isOpened so far
+    isOpened: boolean
     message: string
+    neighbors: number
     x: number
     y: number
 }>()
@@ -13,21 +13,14 @@ const emit = defineEmits<{
     (e: 'bingNeighbors', x: number, y: number): void
 }>()
 
-const isOpened = ref(false)
-const open = () => (isOpened.value = true)
-// const message = props.isBomb ? '💣' : '' // 💥
-
 function handleCellClick() {
     emit('bingNeighbors', props.x, props.y)
-    console.log(props.isBomb)
-    console.log(props.x, props.y)
-    open()
 }
 </script>
 
 <template>
     <div class="single-cell-container">
-        <button :disabled="isOpened" @click="handleCellClick"><p v-if="isOpened" >{{ props.message }}</p></button>
+        <button :disabled="isOpened" @click="handleCellClick"><p v-if="props.isOpened" >{{ props.neighbors !== 0 ? props.neighbors : props.message }}</p></button>
     </div>
 </template>
 
@@ -40,5 +33,6 @@ function handleCellClick() {
 
 button:disabled {
     background-color: grey;
+    color: black;
 }
 </style>

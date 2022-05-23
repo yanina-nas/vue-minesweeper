@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Cell from './components/Cell.vue'
 // import Game from './components/Game.vue'
-import { reactive, ref } from 'vue'
+import { ref } from 'vue'
 
 const DEFAULT_ROWS = 10
 const DEFAULT_COLUMNS = 10
@@ -11,19 +11,34 @@ interface Minefield {
   isOpened: boolean;
   isBomb: boolean;
   message: string;
+  neighbors: number;
 }
 
 const onBingNeighbors = (x: number, y: number) => {
-  console.log('bing my neighbours! I a cell am at ', x, ' ', y)
-  console.log('before updateMinefield', state.value)
   updateMinefield(state.value, x, y)
-  console.log('after updateMinefield', state.value)
+}
+
+const openAround = (minefield: Minefield[][], x: number, y: number) => {
+  let min_i = Math.max(0, x-1)
+  let max_i = Math.min(minefield.length-1, x+1)
+  let min_j = Math.max(0, y-1)
+  let max_j = Math.min(minefield[0].length-1, y+1)
+
+  for(let i = min_i; i <= max_i; i++) {
+    for(let j = min_j; j <= max_j; j++) {
+      minefield[i][j].isOpened = true
+    }
+  }
 }
 
 const updateMinefield = (minefield: Minefield[][], x: number, y: number) => {
-  // minefield[x+1][y+1].isOpened = true
-  console.log('minefield[x+1][y+1] : ', minefield[x+1][y+1])
-  console.log('from update minefield ', x, y)
+  minefield[x][y].isOpened = true
+  if (minefield[x][y].isBomb) {
+    // game over
+  }
+  else if (minefield[x][y].neighbors === 0) { // those having neighbors are now also with empty message neighbors === 0
+    openAround(minefield, x, y)
+  }
 }
 
 const createMinefield = (rows: number, columns: number, numBombs: number) => {
@@ -33,24 +48,23 @@ const createMinefield = (rows: number, columns: number, numBombs: number) => {
   for (let i = 0; i < rows; i++) {
     _minefield[i] = _minefield[i] || [];
     for (let j = 0; j < rows; j++) {
-      _minefield[i][j] = { isOpened: false, isBomb: false, message: "" }
+      _minefield[i][j] = { isOpened: false, isBomb: false, message: "", neighbors: 0 }
     }
   }
-
-  console.log('minefield', _minefield)
 
   const bombs = [...Array(numBombs)].map(() => ([Math.floor(Math.random()*(rows-1)), Math.floor(Math.random()*(columns-1))]))
   console.log('bombs', bombs)
 
-  console.log(_minefield);
-
   bombs.forEach(([ x, y ]) => {
-    console.log([ x, y ]);
-    _minefield[x][y] = { isOpened: false, isBomb: true, message: "💣" };
+    _minefield[x][y] = { isOpened: false, isBomb: true, message: "💣", neighbors: 0  };
+    for(let i = Math.max(0, x-1); i <= Math.min(_minefield.length-1, x+1); i++) {
+      for(let j = Math.max(0, y-1); j <= Math.min(_minefield[0].length-1, y+1); j++) {
+        if (!_minefield[i][j].isBomb) {
+          _minefield[i][j].neighbors = _minefield[i][j].neighbors + 1
+        }
+      }
+    }
   })
-
-  console.log('minefieldWithBomb', _minefield)
-
   return _minefield
 }
 
@@ -62,10 +76,10 @@ const state = ref(tmp)
 
 <template>
   <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
+    <!-- <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" /> -->
     <div @bing-neighbors="onBingNeighbors" class="wrapper">
       <div v-for="(n, numY) in DEFAULT_ROWS" class="gameRow">
-        <Cell @bingNeighbors="onBingNeighbors" v-for="(m, numX) in DEFAULT_COLUMNS" :isOpened=state[numX][numY].isOpened :isBomb=state[numX][numY].isBomb :message=state[numX][numY].message :x=numX :y=numY /> 
+        <Cell @bingNeighbors="onBingNeighbors" v-for="(m, numX) in DEFAULT_COLUMNS" :neighbors="state[numX][numY].neighbors" :isOpened=state[numX][numY].isOpened :isBomb=state[numX][numY].isBomb :message=state[numX][numY].message :x=numX :y=numY /> 
       </div>
     </div>
   </header>
