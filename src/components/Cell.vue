@@ -6,6 +6,7 @@ const props = defineProps<{
     isBomb: boolean
     x: number
     y: number
+    gameover: boolean
 }>()
 
 const emit = defineEmits<{
@@ -41,6 +42,7 @@ function onRightClick() {
             six: props.neighbors === 6 && !props.isBomb,
             seven: props.neighbors === 7 && !props.isBomb,
             eight: props.neighbors === 8 && !props.isBomb,
+            gameover: props.gameover
         }"
     >
         <button

@@ -10,11 +10,12 @@ const DEFAULT_COLUMNS = 10
 const DEFAULT_MINES = 10
 
 interface Minefield {
-  isOpened: boolean;
-  isBomb: boolean;
-  flagPlaced: boolean;
-  message: string;
-  neighbors: number;
+  isOpened: boolean
+  isBomb: boolean
+  flagPlaced: boolean
+  message: string
+  neighbors: number
+  gameover: boolean
 }
 
 const onBingNeighbors = (x: number, y: number) => {
@@ -35,6 +36,15 @@ const toggleFlag = (minefield: Minefield[][], x: number, y: number) => {
 const updateMinefield = (minefield: Minefield[][], x: number, y: number) => {
   minefield[x][y].isOpened = true
   // handle gameover
+  if (minefield[x][y].isBomb) {
+    minefield[x][y].gameover = true
+    for(let indexX = 0; indexX < minefield.length; indexX++) {
+      for(let indexY = 0; indexY < minefield[0].length; indexY++) {
+        minefield[indexX][indexY].isOpened = true
+      }
+    }
+    return
+  }
 
   // go down x 0-9
   for (let downIndex = x; downIndex < 10; downIndex++) {
@@ -120,7 +130,7 @@ const createMinefield = (rows: number, columns: number, numBombs: number) => {
   for (let i = 0; i < rows; i++) {
     _minefield[i] = _minefield[i] || [];
     for (let j = 0; j < rows; j++) {
-      _minefield[i][j] = { isOpened: false, flagPlaced: false, isBomb: false, message: "", neighbors: 0 }
+      _minefield[i][j] = { isOpened: false, flagPlaced: false, isBomb: false, message: "", neighbors: 0, gameover: false }
     }
   }
 
@@ -128,7 +138,7 @@ const createMinefield = (rows: number, columns: number, numBombs: number) => {
   console.log('bombs', bombs)
 
   bombs.forEach(([ x, y ]) => {
-    _minefield[x][y] = { isOpened: false, flagPlaced: false, isBomb: true, message: "💣", neighbors: 0  };
+    _minefield[x][y] = { isOpened: false, flagPlaced: false, isBomb: true, message: "💣", neighbors: 0, gameover: false   };
     for(let i = Math.max(0, x-1); i <= Math.min(_minefield.length-1, x+1); i++) {
       for(let j = Math.max(0, y-1); j <= Math.min(_minefield[0].length-1, y+1); j++) {
         if (!_minefield[i][j].isBomb) {
@@ -161,7 +171,7 @@ onUpdated(() => updateField(state.value))
   <header>
     <div @bing-neighbors="onBingNeighbors" class="wrapper">
       <div v-for="(n, numY) in DEFAULT_ROWS" class="gameRow">
-        <Cell @bingNeighbors="onBingNeighbors" @toggleFlag="onToggleFlag" v-for="(m, numX) in DEFAULT_COLUMNS" :flagPlaced="state[numX][numY].flagPlaced" :neighbors="state[numX][numY].neighbors" :isOpened=state[numX][numY].isOpened :isBomb=state[numX][numY].isBomb :message=state[numX][numY].message :x=numX :y=numY /> 
+        <Cell @bingNeighbors="onBingNeighbors" @toggleFlag="onToggleFlag" v-for="(m, numX) in DEFAULT_COLUMNS" :flagPlaced="state[numX][numY].flagPlaced" :gameover="state[numX][numY].gameover" :neighbors="state[numX][numY].neighbors" :isOpened=state[numX][numY].isOpened :isBomb=state[numX][numY].isBomb :message=state[numX][numY].message :x=numX :y=numY /> 
       </div>
     </div>
   </header>
